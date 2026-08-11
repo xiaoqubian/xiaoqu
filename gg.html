@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>姐姐生日抽奖（每位成语对应一个数字）</title>
+<style>
+  /* 背景用 12.jpg；前面那层 rgba(255,255,255,0.55) 是半透明白蒙版，
+     让照片变淡、文字更清楚。想让照片更明显，把 0.55 改小（如 0.3） */
+  body  { font-family:"Microsoft YaHei",sans-serif; text-align:center;
+          background: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)) , url('img/12.jpg') center / cover no-repeat fixed;
+          padding:40px; }
+  h2    { color:#5b3a4b; }
+  /* 三个成语横向排开，每个下面是它对应的数字 */
+  .slots{ display:flex; justify-content:center; gap:34px; margin:24px 0; }
+  .pair { position:relative; display:flex; flex-direction:column; align-items:center; }
+  .word { background:#ffe0ec; color:#e84393; font-weight:bold; font-size:18px;
+          padding:10px 14px; border-radius:12px; min-width:96px; }
+  .digit{ font-size:34px; font-weight:bold; color:#e84393; margin-top:8px; }
+  .money{ position:relative; color:#e84393; font-size:40px; font-weight:bold; }
+  button{ font-size:18px; padding:12px 30px; border:none; border-radius:20px; background:#e84393; color:#fff; cursor:pointer; margin-top:18px; }
+  /* —— 抽中特效 —— */
+  /* 弹出：从小到大回弹一下 */
+  .pop { animation: pop .45s ease; }
+  @keyframes pop {
+    0%   { transform: scale(.5);  opacity:0; }
+    60%  { transform: scale(1.18); }
+    100% { transform: scale(1);   opacity:1; }
+  }
+  /* 数字闪一下金色光 */
+  .glow { animation: glow .7s ease; }
+  @keyframes glow {
+    0%,100% { text-shadow:none; }
+    50%     { text-shadow:0 0 14px #ffd56b; }
+  }
+  /* 小星星：从成语下方往上飘并淡出 */
+  .sparkle {
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    font-size:20px; pointer-events:none; animation: floatUp .85s ease forwards;
+  }
+  @keyframes floatUp {
+    0%   { opacity:1; }
+    100% { opacity:0; transform:translate(-50%,-44px) scale(1.3); }
+  }
+  /* 滚动中：上下轻微抖动，模拟老虎机滚动 */
+  .rolling { animation: shake .2s infinite; opacity:.85; }
+  @keyframes shake {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-3px); }
+  }
+</style>
+</head>
+<body>
+
+<h2>祝我</h2>
+
+<!-- 三个成语 + 各自下方的数字 -->
+<div class="slots">
+  <div class="pair"><div class="word" id="s1">？</div><div class="digit" id="d1">？</div></div>
+  <div class="pair"><div class="word" id="s2">？</div><div class="digit" id="d2">？</div></div>
+  <div class="pair"><div class="word" id="s3">？</div><div class="digit" id="d3">？</div></div>
+</div>
+
+<h2>的哥哥生日快乐</h2>
+<p>你可以收到来自你弟弟的</p>
+<div class="money">¥ <span id="money">???</span></div>
+<br>
+<button onclick="draw()">开始抽奖</button>
+
+<script>
+// 成语池：每个成语只对应「一位数字」(0~9)
+// >> 想加成语，照格式抄一行 { word:"成语", n:数字 } <<
+const POOL = [
+  { word:"笑口常开", n:1 },
+  { word:"青春永驻", n:8 },
+  { word:"美丽动人", n:6 },
+  { word:"心想事成", n:9 },
+  { word:"万事如意", n:8 },
+  { word:"健康平安", n:5 },
+  { word:"温柔善良", n:3 },
+  { word:"可爱迷人", n:7 },
+  { word:"幸福美满", n:2 },
+  { word:"好运连连", n:8 },
+  { word:"财源滚滚", n:9 },
+  { word:"活力满满", n:6 },
+  { word:"光彩照人", n:8 },
+  { word:"无忧无虑", n:5 },
+  { word:"甜甜蜜蜜", n:8 },
+  { word:"聪明伶俐", n:7 },
+  { word:"亭亭玉立", n:8 },
+  { word:"芳华绝代", n:6 },
+  { word:"吉星高照", n:9 },
+  { word:"岁岁平安", n:5 }
+];
+
+// 三个位置 + 每个滚动时长（3 个 × 2 秒 ≈ 6 秒）
+const slots = [["s1","d1"], ["s2","d2"], ["s3","d3"]];
+const ROLL = 1500;          // 每个成语滚动约 2 秒
+let finalDigits = [];       // 抽好的三个最终数字，用于最后算金额
+
+function draw() {
+  // 1) 随机取 3 个不重复的成语（这是最终揭晓的结果）
+  let list = POOL.slice();
+  let chosen = [];
+  for (let i = 0; i < 3; i++) {
+    let idx = Math.floor(Math.random() * list.length);
+    chosen.push(list.splice(idx, 1)[0]);   // 取出并删除，保证三个不重复
+  }
+  finalDigits = chosen.map(c => c.n);
+
+  // 2) 先把三个位置复位成 "？"
+  slots.forEach(([w, d]) => {
+    document.getElementById(w).textContent = "？";
+    document.getElementById(d).textContent = "？";
+  });
+  document.getElementById("money").textContent = "???";
+
+  // 3) 让三个成语依次「滚动」揭晓，总时长约 6 秒
+  chosen.forEach((c, i) => {
+    setTimeout(() => startRoll(i, c), i * ROLL);
+  });
+}
+
+// 第 i 个位置：先快速滚动随机成语 + 数字，到时间停下并显示最终结果
+function startRoll(i, finalItem) {
+  const wordEl  = document.getElementById(slots[i][0]);
+  const digitEl = document.getElementById(slots[i][1]);
+  wordEl.classList.add("rolling");
+  digitEl.classList.add("rolling");
+
+  // 滚动中：每 70 毫秒换一个随机成语 + 随机数字，像老虎机一样翻滚
+  const timer = setInterval(() => {
+    const r = POOL[Math.floor(Math.random() * POOL.length)];
+    wordEl.textContent  = r.word;
+    digitEl.textContent = r.n;
+  }, 70);
+
+  // 约 ROLL 毫秒后停下，定格到最终结果，并播放弹出 + 闪光 + 星星
+  setTimeout(() => {
+    clearInterval(timer);
+    wordEl.classList.remove("rolling");
+    digitEl.classList.remove("rolling");
+    wordEl.textContent  = finalItem.word;
+    digitEl.textContent = finalItem.n;
+
+    [wordEl, digitEl].forEach(el => {
+      el.classList.remove("pop");
+      void el.offsetWidth;            // 强制重排，让动画能再次播放
+      el.classList.add("pop");
+    });
+    digitEl.classList.add("glow");
+    sparkle(wordEl.parentElement);    // 在成语下方放一颗小星星
+
+    // 第三个停下后，算金额并撒一把星星庆祝
+    if (i === 2) {
+      let amount = finalDigits[0] * 100 + finalDigits[1] * 10 + finalDigits[2];
+      const moneyEl = document.getElementById("money");
+      moneyEl.textContent = amount;
+      moneyEl.classList.remove("pop"); void moneyEl.offsetWidth; moneyEl.classList.add("pop");
+      celebrate();
+    }
+  }, ROLL);
+}
+
+// 在指定元素位置放一颗向上飘的小星星
+function sparkle(parent) {
+  const s = document.createElement("span");
+  s.className = "sparkle";
+  s.textContent = "✨";
+  parent.appendChild(s);
+  setTimeout(() => s.remove(), 850);     // 动画播完就删掉，避免越堆越多
+}
+
+// 金额揭晓时的小庆祝：撒几颗星星
+function celebrate() {
+  const box = document.querySelector(".money");
+  for (let k = 0; k < 6; k++) {
+    const s = document.createElement("span");
+    s.className = "sparkle";
+    s.textContent = "✨";
+    s.style.left = (25 + k * 10) + "%";
+    box.appendChild(s);
+    setTimeout(() => s.remove(), 850);
+  }
+}
+</script>
+
+</body>
+</html>
