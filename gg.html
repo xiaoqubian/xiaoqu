@@ -2,24 +2,28 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>姐姐生日抽奖（每位成语对应一个数字）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>姐姐生日抽奖</title>
 <style>
+ 
+
   /* 背景用 12.jpg；前面那层 rgba(255,255,255,0.55) 是半透明白蒙版，
      让照片变淡、文字更清楚。想让照片更明显，把 0.55 改小（如 0.3） */
-  body  { font-family:"Microsoft YaHei",sans-serif; text-align:center;
-          background: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)) , url('img/12.jpg') center / cover no-repeat fixed;
-          padding:40px; }
+  body  { font-family:"Microsoft YaHei",sans-serif;font-size: 22px; text-align:center;
+          background: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)) , url('img/birthday.jpg') center / cover no-repeat fixed;
+            padding:40px; }
   h2    { color:#5b3a4b; }
   /* 三个成语横向排开，每个下面是它对应的数字 */
   .slots{ display:flex; justify-content:center; gap:34px; margin:24px 0; }
   .pair { position:relative; display:flex; flex-direction:column; align-items:center; }
-  .word { background:#ffe0ec; color:#e84393; font-weight:bold; font-size:18px;
+  .word { background:#ffe0ec; color:#e84393; font-weight:bold; font-size:20px;
           padding:10px 14px; border-radius:12px; min-width:96px; }
   .digit{ font-size:34px; font-weight:bold; color:#e84393; margin-top:8px; }
   .money{ position:relative; color:#e84393; font-size:40px; font-weight:bold; }
   button{ font-size:18px; padding:12px 30px; border:none; border-radius:20px; background:#e84393; color:#fff; cursor:pointer; margin-top:18px; }
   /* —— 抽中特效 —— */
   /* 弹出：从小到大回弹一下 */
+  
   .pop { animation: pop .45s ease; }
   @keyframes pop {
     0%   { transform: scale(.5);  opacity:0; }
@@ -47,6 +51,27 @@
     0%,100% { transform: translateY(0); }
     50%     { transform: translateY(-3px); }
   }
+  @media screen and (max-width:768px){
+    body{
+        font-size:18px;
+        padding:16px; /*手机减小上下左右边距，原来是40px，太大了*/
+    }
+    .slots{
+        gap:16px; /*三个成语之间的间距，手机缩小，原来34px太宽*/
+    }
+    .word{
+        font-size:19px;
+    }
+    .digit{
+        font-size:24px;
+    }
+    .money{
+        font-size:44px;
+    }
+    h2{
+        font-size:22px;
+    }
+}
 </style>
 </head>
 <body>
