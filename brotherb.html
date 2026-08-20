@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>哥哥生日抽奖</title>
 <style>
   /* 背景用 12.jpg；前面那层 rgba(255,255,255,0.55) 是半透明白蒙版，
@@ -46,6 +47,27 @@
   @keyframes shake {
     0%,100% { transform: translateY(0); }
     50%     { transform: translateY(-3px); }
+  }
+  @media screen and (max-width:768px){
+    body{
+        font-size:18px;
+        padding:16px; /*手机减小上下左右边距，原来是40px，太大了*/
+    }
+    .slots{
+        gap:16px; /*三个成语之间的间距，手机缩小，原来34px太宽*/
+    }
+    .word{
+        font-size:19px;
+    }
+    .digit{
+        font-size:24px;
+    }
+    .money{
+        font-size:44px;
+    }
+    h2{
+        font-size:22px;
+    }
   }
 </style>
 </head>
